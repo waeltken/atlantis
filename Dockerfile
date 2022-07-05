@@ -57,6 +57,19 @@ RUN AVAILABLE_CONFTEST_VERSIONS="${DEFAULT_CONFTEST_VERSION}" && \
 
 RUN ln -s /usr/local/bin/cft/versions/${DEFAULT_CONFTEST_VERSION}/conftest /usr/local/bin/conftest
 
+# install Azure CLI
+ENV DEFAULT_AZURE_CLI_VERSION=2.37.0
+
+# Only supported for linux/amd64
+RUN if [ "${TARGETPLATFORM}" == "linux/amd64" ]; \
+    then \
+      apk add --no-cache py3-pip && \
+      pip install --upgrade --no-cache pip && \
+      apk add --no-cache --virtual .azure-cli-deps gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
+      pip install --no-cache-dir azure-cli==${DEFAULT_AZURE_CLI_VERSION} && \
+      apk del .azure-cli-deps; \
+    fi
+
 # copy binary
 COPY --from=builder /app/atlantis /usr/local/bin/atlantis
 
